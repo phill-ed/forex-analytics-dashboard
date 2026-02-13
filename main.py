@@ -14,6 +14,7 @@ import threading
 from src.data.forex_api import ForexAPI
 from src.data.news_api import NewsAPI
 from src.analysis.indicators import TechnicalIndicators
+from src.analysis.ai_analysis import AIAnalyzer, AIForecast
 from src.ui.charts import ChartBuilder
 from src.ui.components import UIComponents
 
@@ -32,6 +33,10 @@ if 'news_api' not in st.session_state:
     st.session_state.news_api = NewsAPI()
 if 'indicators' not in st.session_state:
     st.session_state.indicators = TechnicalIndicators()
+if 'ai_analyzer' not in st.session_state:
+    st.session_state.ai_analyzer = AIAnalyzer()
+if 'ai_forecast' not in st.session_state:
+    st.session_state.ai_forecast = AIForecast()
 if 'selected_pairs' not in st.session_state:
     st.session_state.selected_pairs = ['EUR/USD', 'USD/JPY', 'GBP/USD', 'USD/IDR']
 
