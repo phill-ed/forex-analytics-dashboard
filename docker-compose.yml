@@ -1,0 +1,29 @@
+# Forex Analytics Dashboard
+# Docker Compose Configuration
+
+version: '3.8'
+
+services:
+  forex-dashboard:
+    build: .
+    container_name: forex-analytics-dashboard
+    ports:
+      - "8501:8501"
+    volumes:
+      - .:/app
+      - ./data:/app/data
+    environment:
+      - TZ=UTC
+    restart: unless-stopped
+    
+  # Optional: Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - forex-dashboard
+    restart: unless-stopped
