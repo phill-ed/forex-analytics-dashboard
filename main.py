@@ -209,7 +209,181 @@ def main():
     else:
         st.info("No latest news available")
     
-    # Trading tools section
+    # ============================================
+    # 🤖 AI Analysis Section
+    # ============================================
+    st.divider()
+    st.markdown("""
+    <div style='background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); padding: 15px; border-radius: 10px; margin: 10px 0;'>
+        <h2 style='color: white; margin: 0;'>🤖 AI Analysis</h2>
+        <p style='color: rgba(255,255,255,0.8); margin: 5px 0 0 0;'>AI-powered insights and predictions (EDUCATIONAL ONLY)</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    with st.expander("🤖 View AI Analysis", expanded=True):
+        ai_col1, ai_col2 = st.columns(2)
+        
+        with ai_col1:
+            st.subheader("🎯 AI Trend Prediction")
+            ai_pair = st.selectbox(
+                "Select pair for AI analysis:",
+                st.session_state.selected_pairs or ['EUR/USD'],
+                key='ai_pair_select'
+            )
+            
+            if st.button("🔮 Generate AI Analysis", key='ai_analyze_btn'):
+                with st.spinner("Analyzing market data..."):
+                    # Get data for AI analysis
+                    ai_chart_data = st.session_state.forex_api.get_historical_data(
+                        ai_pair,
+                        timeframe=timeframe,
+                        periods=100
+                    )
+                    
+                    if ai_chart_data is not None and not ai_chart_data.empty:
+                        closes = ai_chart_data['close'].values
+                        highs = ai_chart_data['high'].values
+                        lows = ai_chart_data['low'].values
+                        
+                        # Get news headlines
+                        news_headlines = [n.get('title', '') for n in news[:10]]
+                        
+                        # Run AI analysis
+                        ai_result = st.session_state.ai_analyzer.comprehensive_analysis(
+                            prices=closes,
+                            pair=ai_pair,
+                            news_headlines=news_headlines,
+                            high_price=highs,
+                            low_price=lows
+                        )
+                        
+                        # Display results
+                        trend_colors = {
+                            'bullish': '🟢',
+                            'bearish': '🔴',
+                            'neutral': '🟡'
+                        }
+                        
+                        st.markdown(f"""
+                        ### 📊 AI Analysis Results for {ai_pair}
+                        
+                        | Metric | Value |
+                        |--------|-------|
+                        | **Trend Prediction** | {trend_colors.get(ai_result.trend_prediction, '⚪')} {ai_result.trend_prediction.upper()} |
+                        | **Confidence** | {ai_result.confidence:.0f}% |
+                        | **Risk Level** | {ai_result.risk_level.upper()} |
+                        | **Pattern** | {ai_result.pattern_detected or 'None detected'} |
+                        """, unsafe_allow_html=True)
+                        
+                        # Support & Resistance
+                        st.subheader("📊 Key Levels")
+                        sr_col1, sr_col2 = st.columns(2)
+                        
+                        with sr_col1:
+                            st.markdown("**🛡️ Support Levels**")
+                            for i, level in enumerate(ai_result.support_levels):
+                                st.write(f"  S{i+1}: {level:.5f}")
+                        
+                        with sr_col2:
+                            st.markdown("**📈 Resistance Levels**")
+                            for i, level in enumerate(ai_result.resistance_levels):
+                                st.write(f"  R{i+1}: {level:.5f}")
+                        
+                        # Key Factors
+                        st.subheader("📋 Key Factors")
+                        for factor in ai_result.key_factors:
+                            st.write(f"- {factor}")
+                        
+                        # Insights
+                        st.subheader("💡 AI Insights")
+                        for insight in ai_result.insights:
+                            st.write(f"- {insight}")
+                        
+                        # Disclaimer
+                        st.warning("""
+                        ⚠️ **IMPORTANT DISCLAIMER**
+                        
+                        This AI analysis is provided for **educational and informational purposes only**.
+                        
+                        - ❌ NOT financial advice
+                        - ❌ NOT a buy/sell recommendation
+                        - ❌ Cannot predict future prices
+                        - ⚠️ Always do your own research
+                        - ⚠️ Always use proper risk management
+                        - ⚠️ Consider consulting licensed financial advisors
+                        
+                        Past performance and AI predictions do not guarantee future results.
+                        """)
+                        
+                        # Recommendation
+                        st.markdown("---")
+                        st.markdown(f"**🎓 Educational Observation:**\n\n{ai_result.recommendation}")
+        
+        with ai_col2:
+            st.subheader("🔮 Price Forecast")
+            
+            if st.button("📈 Generate Forecast", key='forecast_btn'):
+                with st.spinner("Calculating forecasts..."):
+                    forecast_data = st.session_state.ai_forecast.forecast(
+                        closes,
+                        periods=7
+                    )
+                    
+                    if 'error' not in forecast_data:
+                        st.markdown(f"""
+                        ### 📊 {forecast_data['periods']}-Day Price Forecast
+                        
+                        **Current Price:** {forecast_data['current_price']}
+                        
+                        | Scenario | Price | Change |
+                        |----------|-------|--------|
+                        | 🟢 Bullish | {forecast_data['forecasts']['bullish']} | +{((forecast_data['forecasts']['bullish']/forecast_data['current_price'])-1)*100:.2f}% |
+                        | 🟡 Expected | {forecast_data['forecasts']['expected']} | {((forecast_data['forecasts']['expected']/forecast_data['current_price'])-1)*100:.2f}% |
+                        | 🔴 Bearish | {forecast_data['forecasts']['bearish']} | {((forecast_data['forecasts']['bearish']/forecast_data['current_price'])-1)*100:.2f}% |
+                        
+                        **Expected Change:** {forecast_data['expected_change_pct']}%  
+                        **Volatility Index:** {forecast_data['volatility_index']}
+                        """, unsafe_allow_html=True)
+                        
+                        st.warning(f"⚠️ {forecast_data['disclaimer']}")
+                    else:
+                        st.error(forecast_data['error'])
+            
+            # Backtest Section
+            st.markdown("---")
+            st.subheader("📉 Strategy Backtest")
+            
+            with st.form("backtest_form"):
+                short_ma = st.number_input("Short MA Period", value=5, min_value=2, max_value=50)
+                long_ma = st.number_input("Long MA Period", value=20, min_value=5, max_value=200)
+                
+                if st.form_submit_button("Run Backtest"):
+                    with st.spinner("Running backtest..."):
+                        bt_result = st.session_state.ai_forecast.backtest_signal(
+                            closes,
+                            short_period=short_ma,
+                            long_period=long_ma
+                        )
+                        
+                        if 'error' not in bt_result:
+                            st.markdown(f"""
+                            ### 📊 Backtest Results
+                            
+                            | Metric | Value |
+                            |--------|-------|
+                            | Total Signals | {bt_result['total_signals']} |
+                            | Buy Signals | {bt_result['buy_signals']} |
+                            | Sell Signals | {bt_result['sell_signals']} |
+                            | Hold Signals | {bt_result['hold_signals']} |
+                            
+                            **Strategy:** MA Crossover ({short_ma}/{long_ma})
+                            """, unsafe_allow_html=True)
+                            
+                            st.info(f"ℹ️ {bt_result['disclaimer']}")
+    
+    # ============================================
+    # 🛠️ Trading Tools Section
+    # ============================================
     st.divider()
     st.subheader("🛠️ Trading Tools")
     

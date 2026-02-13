@@ -21,6 +21,14 @@ A comprehensive Python-based forex trading analytics platform with live market d
 - **Pivot Points**
 - **Support & Resistance Levels**
 
+### 🤖 AI Analysis (NEW!)
+- **AI Trend Prediction** - ML-based trend forecasting
+- **Pattern Recognition** - Auto-detect chart patterns
+- **Price Forecast** - Simple educational projections
+- **Strategy Backtesting** - Test MA crossover strategies
+- **Sentiment Analysis** - News sentiment scoring
+- **Risk Assessment** - AI-powered risk evaluation
+
 ### 📰 News Aggregator
 - Real-time forex news
 - Economic calendar
@@ -228,6 +236,50 @@ dashboard.add_alert(
 
 ### News Feed
 ![News](docs/news-feed.png)
+
+## 🤖 AI Analysis Usage
+
+### Basic AI Analysis
+```python
+from src.analysis.ai_analysis import AIAnalyzer
+
+ai = AIAnalyzer()
+result = ai.comprehensive_analysis(
+    prices=closes,
+    pair='EUR/USD',
+    news_headlines=['Headline 1', 'Headline 2']
+)
+
+print(f"Trend: {result.trend_prediction}")
+print(f"Confidence: {result.confidence}%")
+print(f"Support: {result.support_levels}")
+print(f"Risk Level: {result.risk_level}")
+```
+
+### Price Forecast
+```python
+from src.analysis.ai_analysis import AIForecast
+
+forecast = AIForecast()
+result = forecast.forecast(prices, periods=7)
+
+print(f"Bullish: {result['forecasts']['bullish']}")
+print(f"Expected: {result['forecasts']['expected']}")
+print(f"Bearish: {result['forecasts']['bearish']}")
+```
+
+### Strategy Backtest
+```python
+backtest = AIForecast()
+result = backtest.backtest_signal(
+    prices,
+    short_period=5,
+    long_period=20
+)
+
+print(f"Buy Signals: {result['buy_signals']}")
+print(f"Sell Signals: {result['sell_signals']}")
+```
 
 ## 📦 Dependencies
 
